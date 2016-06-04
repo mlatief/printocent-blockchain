@@ -3,9 +3,8 @@ package main
 import (
   "errors"
   "fmt"
-  "strconv"
   "encoding/json"
-  "github.com/openblockchain/obc-peer/openchain/chaincode/shim"
+  "github.com/hyperledger/fabric/core/chaincode/shim"
 )
 
 type PrintoCentChaincode struct {
@@ -33,28 +32,21 @@ func main() {
 // ============================================================================================================================
 // Init - reset all the things
 // ============================================================================================================================
-func (t *PrintoCentChaincode) init(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
-  var Aval int
+func (t *PrintoCentChaincode) Init(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
   var err error
 
   if len(args) != 1 {
-    return nil, errors.New("Incorrect number of arguments. Expecting deviceid!")
+    return nil, errors.New("Incorrect number of arguments. Expecting welcome message!")
   }
 
   // Initialize the chaincode
-  Aval, err = strconv.Atoi(args[0])
+  err = stub.PutState("HILLA_world", []byte(args[0]))
   if err != nil {
-    return nil, errors.New("Expecting integer value for asset holding")
-  }
-
-  // Write the state to the ledger
-  err = stub.PutState("abc", []byte(strconv.Itoa(Aval)))        //making a test var "abc", I find it handy to read/write to it right away to test the network
-  if err != nil {
-    return nil, err
+      return nil, err
   }
   
   var empty []string
-  jsonAsBytes, _ := json.Marshal(empty)               //marshal an emtpy array of strings to clear the index
+  jsonAsBytes, _ := json.Marshal(empty)               //marshal an emtpy array to clear the index
   err = stub.PutState(devicesIndexStr, jsonAsBytes)
   if err != nil {
     return nil, err
@@ -66,12 +58,12 @@ func (t *PrintoCentChaincode) init(stub *shim.ChaincodeStub, args []string) ([]b
 // ============================================================================================================================
 // Run - Our entry point
 // ============================================================================================================================
-func (t *PrintoCentChaincode) Run(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
+func (t *PrintoCentChaincode) Invoke(stub *shim.ChaincodeStub, function string, args []string) ([]byte, error) {
   fmt.Println("run is running " + function)
 
   // Handle different functions
   if function == "init" {                         //initialize the chaincode state, used as reset
-    return t.init(stub, args)
+    return t.Init(stub, "init", args)
   } else if function == "write" {                     //writes a value to the chaincode state
     return t.Write(stub, args)
   } else if function == "init_device" {                 //create a new marble
