@@ -83,8 +83,10 @@ func (t *PrintoCentChaincode) Query(stub *shim.ChaincodeStub, function string, a
   fmt.Println("query is running " + function)
 
   // Handle different functions
-  if function == "read" {                         //read a variable
-    return t.read(stub, args)
+  if function == "get_state" {                         //read a variable
+    return t.get_state(stub, args)
+  } else if function == "read" {
+    return t.get_state(stub, args)
   }
   fmt.Println("query did not find func: " + function)           //error
 
@@ -94,7 +96,7 @@ func (t *PrintoCentChaincode) Query(stub *shim.ChaincodeStub, function string, a
 // ============================================================================================================================
 // Read - read a variable from chaincode state
 // ============================================================================================================================
-func (t *PrintoCentChaincode) read(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
+func (t *PrintoCentChaincode) get_state(stub *shim.ChaincodeStub, args []string) ([]byte, error) {
   var name, jsonResp string
   var err error
 
